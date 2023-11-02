@@ -24,7 +24,7 @@ from output import DisplayNotebookOutput
 search_settings = SearchSettings(
     dataset_name='my_log_data',
     storage_dir='../storage',
-    source_csv_file='../storage/my_log_data.source.csv',  # path to the CSV file containing the log data
+    source_csv_file='../storage/my_log_data.source.csv',  # Path to the CSV file containing the log data
     drain_config_file='../drain3.ini',
     output=DisplayNotebookOutput(), # Replace with "DisplayNoOutput" for result objects only.
     strategies=[SearchStrategy()]
