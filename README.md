@@ -40,4 +40,4 @@ Please ensure that the CSV file passed to the algorithm contains the required co
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE.md file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
