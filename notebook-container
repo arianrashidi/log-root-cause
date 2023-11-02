@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+
+DOCKERFILE_VERSION=1
+
+IMAGE_NAME="bachelorarbeit"
+IMAGE_LABEL=$DOCKERFILE_VERSION
+IMAGE="${IMAGE_NAME}:latest"
+CONTAINER="${IMAGE_NAME}_v${IMAGE_LABEL}"
+
+GREEN="$(tput setaf 2)"
+NC="$(tput sgr0)"
+
+PATH_TO_SCRIPT_DIR=$(realpath "$0" | sed 's|\(.*\)/.*|\1|')
+
+if ! docker info > /dev/null 2>&1; then
+    echo "${BOLD}Docker is not running.${NC}" >&2
+    exit 1
+fi
+
+##################################################################################################################
+# Functions
+##################################################################################################################
+
+function print_title {
+    echo ""
+    echo "${GREEN}#########################################################${NC}"
+    echo "${GREEN}# ${1}${NC}"
+    echo "${GREEN}#########################################################${NC}"
+}
+
+function container_exists {
+    if [ "$(docker ps -a -q -f name=${CONTAINER})" ]; then
+        return 0
+    fi
+    return 1
+}
+
+function container_running {
+    if [ "$(docker inspect ${CONTAINER} --format '{{.State.Status}}')" = "exited" ]; then
+        return 1
+    fi
+    return 0
+}
+
+function ensure_container_ready {
+    if ! container_exists; then
+        echo "Container does not exist."
+        echo 1
+    fi
+
+    if ! container_running; then
+        echo "Container is not running."
+        echo 1
+    fi
+}
+
+##################################################################################################################
+# Execution
+##################################################################################################################
+
+if [[ $# -eq 0 ]] ; then
+    echo "${GREEN}Verfügbare Befehle:${NC}"
+    echo "./notebook-container up"
+    echo "./notebook-container restart"
+    echo "./notebook-container stop"
+    echo "./notebook-container shell"
+    exit 0
+fi
+
+if [ "$1" = "up" ]; then
+
+    if [[ "$(docker images -q ${IMAGE} 2> /dev/null)" == "" ]]; then
+        print_title "Build Docker image"
+        docker build -t ${IMAGE} -f "${PATH_TO_SCRIPT_DIR}/Dockerfile" .
+    fi
+
+    if container_exists; then
+
+        if ! container_running; then
+            print_title "Start existing Docker container"
+            docker start ${CONTAINER} > /dev/null
+            echo ""
+            echo "Jupyter Notebooks available at: http://localhost:8888"
+            echo ""
+            exit 0
+        fi
+
+        echo 'Container is already running.'
+        exit 1
+    fi
+
+    print_title "Create and start new Docker container"
+    docker run -p 8888:8888 -v "${PATH_TO_SCRIPT_DIR}:/srv/app" --name "${CONTAINER}" -itd ${IMAGE} > /dev/null
+    echo ""
+    echo "Jupyter Notebooks available at: http://localhost:8888"
+    echo ""
+    exit 0
+fi
+
+if [ "$1" = "restart" ]; then
+    ensure_container_ready
+    docker restart ${CONTAINER} > /dev/null
+    echo "Container restarted."
+fi
+
+if [ "$1" = "stop" ]; then
+    ensure_container_ready
+    docker stop ${CONTAINER} > /dev/null
+    echo "Container stopped."
+fi
+
+if [ "$1" = "shell" ]; then
+    ensure_container_ready
+    docker exec -it "${CONTAINER}" /bin/sh
+fi
