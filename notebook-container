@@ -2,7 +2,7 @@
 
 DOCKERFILE_VERSION=1
 
-IMAGE_NAME="bachelorarbeit"
+IMAGE_NAME="log_root_cause"
 IMAGE_LABEL=$DOCKERFILE_VERSION
 IMAGE="${IMAGE_NAME}:latest"
 CONTAINER="${IMAGE_NAME}_v${IMAGE_LABEL}"
@@ -59,7 +59,7 @@ function ensure_container_ready {
 ##################################################################################################################
 
 if [[ $# -eq 0 ]] ; then
-    echo "${GREEN}Verfügbare Befehle:${NC}"
+    echo "${GREEN}Available Commands:${NC}"
     echo "./notebook-container up"
     echo "./notebook-container restart"
     echo "./notebook-container stop"
