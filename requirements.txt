@@ -1,4 +1,4 @@
 drain3==0.9.11
 pandarallel==1.6.5
 pandas==1.5.3
-tqdm==4.66.1
+tqdm==4.66.3
